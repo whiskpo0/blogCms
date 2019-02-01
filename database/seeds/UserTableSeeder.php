@@ -17,23 +17,23 @@ class UserTableSeeder extends Seeder
         DB::table('users')->truncate(); 
 
         // generate 3 users/authors
-        DB::table('users')->insert(
+        DB::table('users')->insert([
             [
-                 'name' => "John Doe",
-                 'email' => "johndoe@test.com", 
-                 'password' => bcrypt('secret') 
+                'name' => "John Doe",
+                'email' => "johndoe@test.com",
+                'password' => bcrypt('secret')
             ],
             [
                 'name' => "Jane Doe",
-                'email' => "janedoe@test.com", 
-                'password' => bcrypt('secret') 
-           ],
-           [
+                'email' => "janedoe@test.com",
+                'password' => bcrypt('secret')
+            ],
+            [
                 'name' => "Edo Masaru",
-                'email' => "edo@test.com", 
-                'password' => bcrypt('secret') 
-           ] 
-    ); 
+                'email' => "edo@test.com",
+                'password' => bcrypt('secret')
+            ],
+    ]); 
 
     }
 }
