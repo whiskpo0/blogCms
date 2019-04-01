@@ -30,10 +30,11 @@
               </a>
               <ul class="treeview-menu">
                 <li><a href="{{ route('backend.blog.index')}}"><i class="fa fa-circle-o"></i> All Posts</a></li>
-                <li><a href="#"><i class="fa fa-circle-o"></i> Add New</a></li>
+                <li><a href="{{ route('backend.blog.create')}}"><i class="fa fa-circle-o"></i> Add New</a></li>
               </ul>
             </li>
-            <li><a href="{{ route('backend.blog.create')}}"><i class="fa fa-folder"></i> <span>Categories</span></a></li>
+            <li><a href="{{ route('backend.categories.index')}}"><i class="fa fa-folder"></i> <span>Categories</span></a></li>
+            <li><a href="{{ route('backend.users.index')}}"><i class="fa fa-users"></i> <span>Users</span></a></li>
           </ul>
         </section>
         <!-- /.sidebar -->

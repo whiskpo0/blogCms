@@ -1,14 +1,16 @@
 <?php
 
 namespace App;
-
+use Illuminate\Database\Eloquent\SoftDeletes; 
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use GrahamCampbell\Markdown\Facades\Markdown; 
 
 class Post extends Model
 {
+    use SoftDeletes; 
 
+    protected $fillable = ['title', 'slug', 'excerpt', 'body', 'published_at', 'category_id', 'image']; 
     protected $dates = ['published_at']; 
 
     public function author()
@@ -21,14 +23,20 @@ class Post extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function setPublishedAtAttribute($value)
+    { 
+        $this->attributes['published_at'] = $value ?: NULL; 
+    }
+
     public function getImageUrlAttribute($value)
     {
         $imageUrl = "";
 
         if ( ! is_null($this->image))
         {
-            $imagePath = public_path() . "/img/" . $this->image;
-            if (file_exists($imagePath)) $imageUrl = asset("img/" . $this->image);
+            $directory = config('cms.image.directory'); 
+            $imagePath = public_path() . "/{$directory}/" . $this->image;
+            if (file_exists($imagePath)) $imageUrl = asset("{$directory}/" . $this->image);
         }
 
         return $imageUrl;
@@ -40,11 +48,12 @@ class Post extends Model
 
         if ( ! is_null($this->image))
         {
+            $directory = config('cms.image.directory'); 
             $ext =  substr(strrchr($this->image, '.'), 1 ); 
             $thumbnail = str_replace(".jpg", "_thumb.jpg", $this->image); 
 
-            $imagePath = public_path() . "/img/" . $thumbnail;
-            if (file_exists($imagePath)) $imageUrl = asset("img/" . $thumbnail);
+            $imagePath = public_path() . "/{$directory}/" . $thumbnail;
+            if (file_exists($imagePath)) $imageUrl = asset("{$directory}/" . $thumbnail);
         }
 
         return $imageUrl;
@@ -97,4 +106,15 @@ class Post extends Model
     {
         return $query->where("published_at", "<=", Carbon::now()); 
     }
+    
+    public function scopeScheduled($query)
+    {
+        return $query->where("published_at", ">", Carbon::now()); 
+    }
+    
+    public function scopeDraft($query)
+    {
+        return $query->whereNull("published_at"); 
+    }
+    
 }
