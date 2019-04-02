@@ -41,7 +41,8 @@ class UsersController extends BackendController
      */
     public function store(Requests\UserStoreRequest $request)
     {
-        User::create($request->all());
+        $user = User::create($request->all());
+        $user->attachRole($request->role);
 
         return redirect("/backend/users")->with("message", "New user was created successfully!");
     }
@@ -79,8 +80,15 @@ class UsersController extends BackendController
      */
     public function update(Requests\UserUpdateRequest $request, $id)
     {
-        User::findOrFail($id)->update($request->all());
-
+        $data = $request->all();    
+        if (empty($data['password'])) unset($data['password']);
+        else $data['password'] = bcrypt($data['password']);
+     
+        $user  = User::findOrFail($id);
+        $user->update($data);
+     
+        $user->detachRoles();
+        $user->attachRole($request->role);
         return redirect("/backend/users")->with("message", "User was updated successfully!");
     }
 
@@ -112,7 +120,7 @@ class UsersController extends BackendController
 
     public function confirm(Requests\UserDestroyRequest $request, $id)
     {
-        $user  = User::findOrFail($id);
+        $user = User::findOrFail($id);
         $users = User::where('id', '!=', $user->id)->pluck('name', 'id');
 
         return view("backend.users.confirm", compact('user', 'users'));

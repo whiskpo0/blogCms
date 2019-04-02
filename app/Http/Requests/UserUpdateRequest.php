@@ -24,9 +24,11 @@ class UserUpdateRequest extends Request
     public function rules()
     {
         return [
-            'name'      => 'required',
-            'email'     => 'email|required|unique:users,email,' . $this->route("users"),
-            'password'  => 'required_with:password_confirmation|confirmed'
+            'name'     => 'required',
+            'email'    => 'email|required|unique:users,email,' . $this->route("users"),
+            'password' => 'required_with:password_confirmation|confirmed', 
+            'role'     => 'required',
+            'slug'     => 'required|unique:users,slug,' .$this->route("users"),
         ];
     }
 }

@@ -1,7 +1,7 @@
 @extends('layouts.backend.main')
 
-@section('title', 'MyBlog | Dashboard')
-    
+@section('title', 'MyBlog | Dashboar')
+
 @section('content')
 
     <div class="content-wrapper">
