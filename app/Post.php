@@ -23,6 +23,51 @@ class Post extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class);
+    }
+
+    public function createTags($str)
+    {
+        $tags = explode(",", $str);
+        $tagIds = [];
+
+        foreach ($tags as $tag)
+        {
+            $newTag = Tag::firstOrCreate([
+                'slug' => str_slug($tag),
+                'name' => ucwords(trim($tag))
+            ]);
+
+            $tagIds[] = $newTag->id;
+        }
+
+        $this->tags()->sync($tagIds);
+    }
+
+    public function getTagsListAttribute()
+    {
+        return $this->tags->pluck('name');
+    }
+
+    public function comments()
+    { 
+        return $this->hasMany(Comment::class); 
+    }
+
+    public function commentsNumber($label = 'Comment') 
+    { 
+        $commentsNumber = $this->comments->count(); 
+
+        return $commentsNumber . " " . str_plural($label, $commentsNumber); 
+    }
+
+    public function createComment(array $data)
+    { 
+        $this->comments()->create($data); 
+    }
+
     public function setPublishedAtAttribute($value)
     { 
         $this->attributes['published_at'] = $value ?: NULL; 
@@ -74,6 +119,15 @@ class Post extends Model
         return $this->excerpt ? Markdown::convertToHtml(e($this->excerpt)) : NULL; 
     }
 
+    public function getTagsHTMLAttribute()
+    {
+        $anchors = []; 
+        foreach ($this->tags as $tag){
+           $anchors[] =  '<a href="'. route('tag', $tag->slug) . '">' . $tag->name .'</a>'; 
+        }
+        return implode(", ", $anchors); 
+    }
+
     public function dateFormatted($showTimes = false)
     { 
         $format = "d/m/Y"; 
@@ -116,5 +170,40 @@ class Post extends Model
     {
         return $query->whereNull("published_at"); 
     }
+
+    public static function archives()
+    { 
+        return static::selectRaw('count(id) as post_count, year(published_at) year, monthname(published_at) month')
+                        ->published()
+                        ->groupBy('year','month')
+                        ->orderByRaw('min(published_at) desc')
+                        ->get(); 
+    }
+
+    public function scopeFilter($query, $filter)
+    { 
+        if(isset($filter['month']) && $month = $filter['month']){ 
+            $query->whereRaw('month(published_at) = ?', [Carbon::parse($month)->month]); 
+        }
+
+        if(isset($filter['year']) && $year = $filter['year']){ 
+            $query->whereRaw('year(published_at) = ?', [$year]); 
+        }
+
+        // check if any filter entered
+        if (isset($filter['term']) && $term = $filter['term'])
+        { 
+            $query->where(function($q) use ($term) { 
+                // $q->whereHas('author', function($qr) use ($term){
+                //     $qr->where('name', 'LIKE', "%{$term}%"); 
+                // }); 
+                // $q->orWhereHas('category', function($qr) use ($term){
+                //     $qr->where('title', 'LIKE', "%{$term}%"); 
+                // });
+                $q->orWhere('title', 'LIKE', "%{$term}%"); 
+                $q->orWhere('excerpt', 'LIKE', "%{$term}%");
+            });    
+        }
+}
     
 }

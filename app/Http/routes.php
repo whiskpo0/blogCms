@@ -11,6 +11,10 @@
 |
 */
 
+if(version_compare(PHP_VERSION, '7.2.0', '>=')) {
+    error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
+}
+
 Route::get('/', [
     'uses' => 'BlogController@index',
     'as'   => 'blog'
@@ -21,6 +25,11 @@ Route::get('/blog/{post}', [
     'as'   => 'blog.show'
 ]);
 
+Route::post('/blog/{post}/comments', [
+    'uses' => 'CommentsController@store',
+    'as'   => 'blog.comments'
+]);
+
 Route::get('/category/{category}', [
     'uses' => 'BlogController@category',
     'as'   => 'category'
@@ -29,6 +38,11 @@ Route::get('/category/{category}', [
 Route::get('/author/{author}', [
     'uses' => 'BlogController@author',
     'as'   => 'author'
+]);
+
+Route::get('/tag/{tag}', [
+    'uses' => 'BlogController@tag',
+    'as'   => 'tag'
 ]);
 
 Route::auth();
